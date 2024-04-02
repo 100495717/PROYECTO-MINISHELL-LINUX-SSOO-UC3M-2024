@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
                    {//PADRE
                        if (x == 0 && command_counter > 1)
                        {//Para el primer comando solo cerramos el input de la primera tubería, no lo vamos a usar de nuevo
-                           close(fdpI[0][1]);
+                           close(fdpip[0][1]);
                        }
                        if (x > 0)
                        {//cerramos todas las tuberías, no las vamos a volver a usar
