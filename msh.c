@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
                 if (mensaje[1] == '0')
                 {
                     // Si mensaje[1] == 0 escribimos en el std_error
-                    write(STERR_FILENO, mensaje, strlen(mensaje));
+                    write(STDERR_FILENO, mensaje, strlen(mensaje));
                 }
                 else
                 {
@@ -269,8 +269,8 @@ int main(int argc, char* argv[])
                         //Imprimimos el número de comando actual
                         fprintf(stderr,"%d",count);
                         for (int j = 0; j < history[i].num_commands; j++){
-                            for (int k = 0; k < history.[i].args[j]; k++){
-                                fprintf(stderr,"%s ", history.[i].argvv[j][k]);
+                            for (int k = 0; k < history[i].args[j]; k++){
+                                fprintf(stderr,"%s ", history[i].argvv[j][k]);
                             }
                             fprintf(stderr," | ");
                         }
@@ -341,95 +341,95 @@ int main(int argc, char* argv[])
                                close(fd1);
                            }
                        }
-                       if (command_counter == 1)
-                       {
-                           //Si solo tenemos un comando tenemos que mirar el fichero de salida y de error)
-                           if (strcmp(filev[1], "0") != 0)
+                           if (command_counter == 1)
                            {
-                               if ((fd2 = open (filev[1], O_WRONLY | O_CREAT | O_TRUNC, 0664)) < 0)
+                               //Si solo tenemos un comando tenemos que mirar el fichero de salida y de error)
+                               if (strcmp(filev[1], "0") != 0)
                                {
-                                   perror("No se puede abrir el fichero de salida");
+                                   if ((fd2 = open (filev[1], O_WRONLY | O_CREAT | O_TRUNC, 0664)) < 0)
+                                   {
+                                       perror("No se puede abrir el fichero de salida");
+                                   }
+                                   //Cambiamos la salida al fichero de salida
+                                   dup2(fd2, STDOUT_FILENO);
+                                   close(fd2);
                                }
-                               //Cambiamos la salida al fichero de salida
-                               dup2(fd2, STDOUT_FILENO);
-                               close(fd2);
+                               if (strcmp(filev[2], "0") != 0)
+                               {
+                                   if ((fd3 = open (filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) < 0)
+                                   {
+                                       perror("No se puede abrir el fichero de error");
+                                   }
+                                   //Cambiamos el error al fichero de error
+                                   dup2(fd3, STDERR_FILENO);
+                                   close(fd3);
+                               }
                            }
-                           if (strcmp(filev[2], "0") != 0)
+                               else
+                               {
+                                   //Cambiamos la salida a la primera tubería
+                                   dup2(fdpip[0][1], STDOUT_FILENO);
+                               }
+                           }
+                           else if (x < command_counter - 1)
                            {
-                               if ((fd3 = open (filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) < 0)
-                               {
-                                   perror("No se puede abrir el fichero de error");
-                               }
-                               //Cambiamos el error al fichero de error
-                               dup2(fd3, STDERR_FILENO);
-                               close(fd3);
+                               // Si el comando está entre el primero y el último
+                               //Cambiamos la entrada del comando a la salida de la tuberia anterior
+                               dup2(fdpip[x-1][0], STDIN_FILENO);
+                               //Cambiamos la saida del comando a la entrada de la tuberia anterior
+                               dup2(fdpip[x][1], STDOUT_FILENO);
                            }
-                       }
-                       else
-                       {
-                           //Cambiamos la salida a la primera tubería
-                           dup2(fdpip[0][1], STDOUT_FILENO);
-                       }
-                   }
-                   else if (i < command_counter - 1)
-                   {
-                       // Si el comando está entre el primero y el último
-                       //Cambiamos la entrada del comando a la salida de la tuberia anterior
-                       dup2(fdpip[x-1][0], STDIN_FILENO);
-                       //Cambiamos la saida del comando a la entrada de la tuberia anterior
-                       dup2(fdpip[x][1], STDOUT_FILENO);
-                   }
+                           else
+                           { // Si el comando es el último de la secuencia, cambiamos el input del comando a la tubería anterior como output
+                               dup2(fdpip[x - 1][0], STDIN_FILENO);
+                               if (strcmp(filev[1], "0") != 0)
+                               {// output file
+                                   if ((fd2 = open(filev[1], O_WRONLY | O_CREAT | O_TRUNC, 0664)) < 0)
+                                   {//Si no puede abrirse, error
+                                       perror("No se puede leer el fichero de salida");
+                                   }
+                                   dup2(fd2, STDOUT_FILENO);
+                                   close(fd2);
+                               }
+                               if (strcmp(filev[2], "0") != 0)
+                               {//Fichero de errores
+                                   if ((fd3 = open(filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) < 0)
+                                   {//Si no puede abrirse, error
+                                       perror("No se puede leer el fichero de salida");
+                                   }
+                                   //Cambiamos el standard error al fichero de errores
+                                   dup2(fd3, STDERR_FILENO);
+                                   close(fd3);
+                               }
+                           }
+                           for (int y = 0; y < command_counter - 1; y++)
+                           {//Cerramos todas las tuberías aunque ya lo estén
+                               close(fdpip[y][0]); //Output
+                               close(fdpip[y][1]); //Input
+                           }
+                           //Hacemos el execvp
+                           execvp(argv_execvp[0], argv_execvp);
+                           }
                    else
-                   { // Si el comando es el último de la secuencia, cambiamos el input del comando a la tubería anterior como output
-                       dup2(fdpip[x - 1][0], STDIN_FILENO);
-                       if (strcmp(filev[1], "0") != 0)
-                       {// output file
-                           if ((fd2 = open(filev[1], O_WRONLY | O_CREAT | O_TRUNC, 0664)) < 0)
-                           {//Si no puede abrirse, error
-                               perror("No se puede leer el fichero de salida");
+                   {//PADRE
+                       if (x == 0 && command_counter > 1)
+                       {//Para el primer comando solo cerramos el input de la primera tubería, no lo vamos a usar de nuevo
+                           close(fdpip[0][1]);
+                       }
+                           if (x > 0)
+                           {//cerramos todas las tuberías, no las vamos a volver a usar
+                               close(fdp[x - 1][1]);
+                               close(fdp[x - 1][0]);
                            }
-                           dup2(fd2, STDOUT_FILENO);
-                           close(fd2);
-                       }
-                       if (strcmp(filev[2], "0") != 0)
-                       {//Fichero de errores
-                           if ((fd3 = open(filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) < 0)
-                           {//Si no puede abrirse, error
-                               perror("No se puede leer el fichero de salida");
+                           if (in_background == 0)
+                           {//Solo esperamos si background is False
+                               wait(NULL);
                            }
-                           //Cambiamos el standard error al fichero de errores
-                           dup2(fd3, STDERR_FILENO);
-                           close(fd3);
-                       }
-                   }
-                   for (int y = 0; y < command_counter - 1; y++)
-                   {//Cerramos todas las tuberías aunque ya lo estén
-                       close(fdpip[y][0]); //Output
-                       close(fdpip[y][1]); //Input
-                   }
-                   //Hacemos el execvp
-                   execvp(argv_execvp[0], argv_execvp);
-                   }
-               else
-               {//PADRE
-                   if (x == 0 && command_counter > 1)
-                   {//Para el primer comando solo cerramos el input de la primera tubería, no lo vamos a usar de nuevo
-                       close(fdpip[0][1]);
-                   }
-                       if (x > 0)
-                       {//cerramos todas las tuberías, no las vamos a volver a usar
-                           close(fdp[x - 1][1]);
-                           close(fdp[x - 1][0]);
-                       }
-                       if (in_background == 0)
-                       {//Solo esperamos si background is False
-                           wait(NULL);
-                       }
-                       else
-                       {//No esperamos
-                           if (x == command_counter - 1)
-                           {//Imprime el pid del último comando, para mandatos simples sera también el último
-                               printf("[%d]\n", pid);
+                           else
+                           {//No esperamos
+                               if (x == command_counter - 1)
+                               {//Imprime el pid del último comando, para mandatos simples sera también el último
+                                   printf("[%d]\n", pid);
                            }
                        }
                    }
