@@ -196,15 +196,15 @@ int main(int argc, char* argv[])
 
 		/************************ STUDENTS CODE ********************************/
 	   if (command_counter > 0) {
-           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] == NULL{
+           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] == NULL){
                printf("No se ha introducido el primer operando");
                return -1
            }
-           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][2] == NULL{
+           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][2] == NULL){
                printf("No se ha introducido la operación");
                return -1
            }
-           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][3] == NULL{
+           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][3] == NULL){
                printf("No se ha introducido el segundo operando");
                return -1
            }
@@ -438,5 +438,5 @@ int main(int argc, char* argv[])
            }
 		}
     }
-    return 0;
+    return 0
 }
