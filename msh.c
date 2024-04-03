@@ -197,15 +197,15 @@ int main(int argc, char* argv[])
 		/************************ STUDENTS CODE ********************************/
 	   if (command_counter > 0) {
            if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] == NULL{
-               printf("No se ha introducido el primer operando")
+               printf("No se ha introducido el primer operando");
                return -1
            }
            if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][2] == NULL{
-               printf("No se ha introducido la operación")
+               printf("No se ha introducido la operación");
                return -1
            }
            if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][3] == NULL{
-               printf("No se ha introducido el segundo operando")
+               printf("No se ha introducido el segundo operando");
                return -1
            }
 			 else if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] != NULL && argvv[0][2] != NULL && argvv[0][3] != NULL) {
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
                 if (mensaje[1] == '0')
                 {
                     // Si mensaje[1] == 0 escribimos en el std_error
-                    write(SRDERR_FILENO, mensaje, strlen(mensaje));
+                    write(STERR_FILENO, mensaje, strlen(mensaje));
                 }
                 else
                 {
@@ -263,15 +263,15 @@ int main(int argc, char* argv[])
                     int start = (head+1) % history_size;
                     int i = start;
                     int count = 1;
-                    while(count<HISTORY_SIZE){
+                    while(count<history_size){
                         if (history[i].num_commands == 0){
                             break;
                         }
                         //Imprimimos el número de comando actual
                         fprintf(stderr,"%d",count);
-                        for (int j = 0; j < history[i].num_commads; j++){
+                        for (int j = 0; j < history[i].num_commands; j++){
                             for (int k = 0; k < history.[i].args[j]; k++){
-                                fprintf(stderr,"%s ", history[i].argvv[j][v]);
+                                fprintf(stderr,"%s ", history.[i].argvv[j][k]);
                             }
                             fprintf(stderr," | ");
                         }
@@ -308,24 +308,24 @@ int main(int argc, char* argv[])
                int fdpip[command_counter - 1][2];
 
                // Creamos las tuberias
-               for (int x = 0); x < command_counter - 1; x++)
+               for (int x = 0; x < command_counter - 1; x++)
                 {
                     if (pipe(fdpip[x]) == -1)
                     {
                         // Mostramos un mensaje de error si no se crea la tuberia
-                        perror("No se puede crear la tuberia")
+                        perror("No se puede crear la tuberia");
                     }
                 }
 
-               for (int x = 0; x < comand_counter; i++)
+               for (int x = 0; x < command_counter; x++)
                {
                    //Creamos al hijo
                    pid = fork();
 
                    if(pid == -1){
                        //Si hay algun error
-                       perror("Hay un error al crear al hijo")
-                       return(-1);
+                       perror("Hay un error al crear al hijo");
+                       return(-1)
                    }
                    else if (pid == 0)
                    {
@@ -334,8 +334,8 @@ int main(int argc, char* argv[])
                            // En el primer comando
                            if(strcmp(filev[0], "0") != 0){
                                //Comprobamos que haya un fichero de entrada
-                               if ((fd = open(filev[0], O_RDONLY)) < 0) {
-                                   perror("No se puede leer el fichero de entrada")
+                               if ((fd1 = open(filev[0], O_RDONLY)) < 0) {
+                                   perror("No se puede leer el fichero de entrada");
                                }
                                //Cambiamos la entrada al fichero de entrada
                                dup2(fd1, STDIN_FILENO);
@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
                                }
                                //Cambiamos el error al fichero de error
                                dup2(fd3, STDERR_FILENO);
-                               close(fd3)
+                               close(fd3);
                            }
                        }
                        else
@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
                                perror("No se puede leer el fichero de salida");
                            }
                            dup2(fd2, STDOUT_FILENO);
-                           close(fd2)
+                           close(fd2);
                        }
                        if (strcmp(filev[2], "0") != 0)
                        {//Fichero de errores
@@ -405,18 +405,18 @@ int main(int argc, char* argv[])
                    }
                    for (int y = 0; y < command_counter - 1; y++)
                    {//Cerramos todas las tuberías aunque ya lo estén
-                       close(fdp[y][0]); //Output
-                       close(fdp[y][1]); //Input
+                       close(fdpip[y][0]); //Output
+                       close(fdpip[y][1]); //Input
                    }
                    //Hacemos el execvp
                    execvp(argv_execvp[0], argv_execvp);
                    }
-                   else
-                   {//PADRE
-                       if (x == 0 && command_counter > 1)
-                       {//Para el primer comando solo cerramos el input de la primera tubería, no lo vamos a usar de nuevo
-                           close(fdpip[0][1]);
-                       }
+               else
+               {//PADRE
+                   if (x == 0 && command_counter > 1)
+                   {//Para el primer comando solo cerramos el input de la primera tubería, no lo vamos a usar de nuevo
+                       close(fdpip[0][1]);
+                   }
                        if (x > 0)
                        {//cerramos todas las tuberías, no las vamos a volver a usar
                            close(fdp[x - 1][1]);
@@ -435,9 +435,8 @@ int main(int argc, char* argv[])
                        }
                    }
                }
-
            }
 		}
     }
-	return 0;
+    return 0;
 }
