@@ -1,4 +1,4 @@
-º//P2-SSOO-23/24
+//P2-SSOO-23/24
 //  MSH main file
 // Write your msh source code here
 //#include "parser.h"
@@ -126,7 +126,7 @@ void getCompleteCommand(char*** argvv, int num_command) {
 	for(int j = 0; j < 8; j++)
 		argv_execvp[j] = NULL;
 
-	int i = 0;
+	int i;
 	for ( i = 0; argvv[num_command][i] != NULL; i++)
 		argv_execvp[i] = argvv[num_command][i];
 }
@@ -171,9 +171,9 @@ int main(int argc, char* argv[])
 		signal(SIGINT, siginthandler);
 
 		if (run_history)
-    {
+        {
         run_history=0;
-    }
+        }
     else{
         // Prompt
         write(STDERR_FILENO, "MSH>>", strlen("MSH>>"));
@@ -194,106 +194,102 @@ int main(int argc, char* argv[])
 
 		/************************ STUDENTS CODE ********************************/
 	   if (command_counter > 0) {
-           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] == NULL){
-               printf("No se ha introducido el primer operando");
+           if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][1] == NULL) {
+               printf("No se ha introducido el primer operando\n");
                return -1;
            }
-           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][2] == NULL){
-               printf("No se ha introducido la operación");
+           if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][2] == NULL) {
+               printf("No se ha introducido la operación\n");
                return -1;
            }
-           if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][3] == NULL){
-               printf("No se ha introducido el segundo operando");
+           if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][3] == NULL) {
+               printf("No se ha introducido el segundo operando\n");
                return -1;
-           }
-           else if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] != NULL && argvv[0][2] != NULL && argvv[0][3] != NULL) {
-            //Si los argumentos son correctos, coge el comando mycalc
+           } else if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][1] != NULL && argvv[0][2] != NULL &&
+                      argvv[0][3] != NULL) {
+               //Si los argumentos son correctos, coge el comando mycalc
                int arg1 = atoi(argvv[0][1]), arg2 = atoi(argvv[0][3]); // Convierte los argumentos en enteros
                char mensaje[100]; //Variable para guardar el mensaje
-               if (strcmp(argvv[0][2], "add") == 0){
-                //Caso de la suma
+               if (strcmp(argvv[0][2], "add") == 0) {
+                   //Caso de la suma
                    char var_entorno[128];
                    char *p = var_entorno; //Puntero de la variable de entorno
-                   if (p==NULL) {
-                //Inicializa el valor de Acc
+                   if (p == NULL) {
+                       //Inicializa el valor de Acc
                        p = "0";
                    }
-                //Guardamos en var_entorno el valor de Acc como string
-                   sprintf(var_entorno,"%d",(atoi(var_entorno) + arg1 + arg2));
-                //Creamos la variable de entorno Acc con valor p
-                   setenv("Acc",p,1);
-                //Guardamos en mensaje la salida
-                   snprintf(mensaje,100,"[OK] %d + %d = %d; Acc %s\n",arg1,arg2,arg1+arg2,getenv("Acc"));
+                   //Guardamos en var_entorno el valor de Acc como string
+                   sprintf(var_entorno, "%d", (atoi(var_entorno) + arg1 + arg2));
+                   //Creamos la variable de entorno Acc con valor p
+                   setenv("Acc", p, 1);
+                   //Guardamos en mensaje la salida
+                   snprintf(mensaje, 100, "[OK] %d + %d = %d; Acc %s\n", arg1, arg2, arg1 + arg2, getenv("Acc"));
                }
-               else if (strcmp(argvv[0][2], "mul") == 0 )
-               {//Caso de que los argumentos esten multiplicados, guarda el mensaje en la variable mensaje
+               else if (strcmp(argvv[0][2], "mul") ==
+                          0) {//Caso de que los argumentos esten multiplicados, guarda el mensaje en la variable mensaje
                    snprintf(mensaje, 100, "[OK] %d * %d - %d\n", arg1, arg2, arg1 * arg2);
                }
-               else if (strcmp(argvv[0][2], "div") == 0 )
-               {//Caso de que el argumento sea div
-                   if (arg2 == 0)
-                   {// Comprueba si se divide /0
+               else if (strcmp(argvv[0][2], "div") == 0) {//Caso de que el argumento sea div
+                   if (arg2 == 0) {// Comprueba si se divide /0
                        snprintf(mensaje, 100, "[ERROR] No puedes dividir por 0\n");
-                   }
-                   else
-                    {//Guarda en la variable mensaje, el mensaje
+                   } else {//Guarda en la variable mensaje, el mensaje
                        snprintf(mensaje, 100, "[OK] %d / %d = %d; Resto %d\n", arg1, arg2, arg1 / arg2, arg1 % arg2);
-                    }
+                   }
                }
-               else
-               { //Hay un error con la estructura del comando, de nuevo guardamos el mensaje en nuestra variable mensaje
-                    snprintf(mensaje, 100, "[ERROR] La estructura del comando es mycalc <operando_1> <add/mul/div> <operando_2>\n");
+               else { //Hay un error con la estructura del comando, de nuevo guardamos el mensaje en nuestra variable mensaje
+                   snprintf(mensaje, 100,
+                            "[ERROR] La estructura del comando es mycalc <operando_1> <add/mul/div> <operando_2>\n");
                }
-               if (mensaje[1] == '0')
-               {
-                    // Si mensaje[1] == 0 escribimos en el std_error
+               if (mensaje[1] == '0') {
+                   // Si mensaje[1] == 0 escribimos en el std_error
                    write(STDERR_FILENO, mensaje, strlen(mensaje));
                }
-               else
-               {
-                    // En cualquier otro caso escribimos en el std_output
+               else {
+                   // En cualquier otro caso escribimos en el std_output
                    write(STDOUT_FILENO, mensaje, strlen(mensaje));
                }
            }
-           else if(strcmp(argvv[0][0],"myhistory")==0){
-               if (argvv[0][1] == NULL){
-                    //Se desea ver la lista de los últimos 20 comandos
-                   int start = (head+1) % history_size;
+           else if (strcmp(argvv[0][0], "myhistory") == 0) {
+               if (argvv[0][1] == NULL) {
+                   //Se desea ver la lista de los últimos 20 comandos
+                   int start = (head + 1) % history_size;
                    int i = start;
                    int count = 1;
-                   while(count<history_size){
-                       if (history[i].num_commands == 0){
+                   while (count < history_size) {
+                       if (history[i].num_commands == 0) {
                            break;
                        }
                        //Imprimimos el número de comando actual
-                       fprintf(stderr,"%d",count);
-                       for (int j = 0; j < history[i].num_commands; j++){
-                           for (int k = 0; k < history[i].args[j]; k++){
-                               fprintf(stderr,"%s ", history[i].argvv[j][k]);
+                       fprintf(stderr, "%d", count);
+                       for (int j = 0; j < history[i].num_commands; j++) {
+                           for (int k = 0; k < history[i].args[j]; k++) {
+                               fprintf(stderr, "%s ", history[i].argvv[j][k]);
                            }
-                           fprintf(stderr," | ");
+                           fprintf(stderr, " | ");
                        }
-                       fprintf(stderr,"\n");
-                       i = (i+1) % history_size;
+                       fprintf(stderr, "\n");
+                       i = (i + 1) % history_size;
                        count++;
                    }
                    run_history = 1;
                }
-               else{
+               else {
                    int argumento = atoi(argvv[0][1]);
-                   if (argumento >= 0 && argumento <= 19){
-                       int indice = (head+1+argumento) % history_size;
-                       if (history[indice].num_commands != 0){
-                           fprintf(stderr,"Ejecutando el comando %d\n", argumento);
-                            //Obtenemos el comando correspondiente
-                            char *comando = history[argumento].argvv[0][0];
-                            execvp(comando,history[indice].argvv[0]);
-                            //
+                   if (argumento >= 0 && argumento <= 19) {
+                       int indice = (head + 1 + argumento) % history_size;
+                       if (history[indice].num_commands != 0) {
+                           fprintf(stderr, "Ejecutando el comando %d\n", argumento);
+                           //Obtenemos el comando correspondiente
+                           char *comando = history[argumento].argvv[0][0];
+                           execvp(comando, history[indice].argvv[0]);
+                           //
                        }
+                   } else {
+                       fprintf(stderr, "ERROR: Comando no encontrado\n")
                    }
-
                }
            }
+
            else
            {
                pid_t pid;
@@ -311,7 +307,6 @@ int main(int argc, char* argv[])
                         perror("No se puede crear la tuberia");
                     }
                 }
-
                for (int x = 0; x < command_counter; x++)
                {
                    //Creamos al hijo
@@ -351,17 +346,20 @@ int main(int argc, char* argv[])
                                    //Cambiamos el error al fichero de error
                                    dup2(fd3, STDERR_FILENO);
                                    close(fd3);
-                               } else {
+                               }
+                               else {
                                    //Cambiamos la salida a la primera tubería
                                    dup2(fdpip[0][1], STDOUT_FILENO);
                                }
-                           } else if (x < command_counter - 1) {
+                           }
+                           else if (x < command_counter - 1) {
                                // Si el comando está entre el primero y el último
                                //Cambiamos la entrada del comando a la salida de la tuberia anterior
                                dup2(fdpip[x - 1][0], STDIN_FILENO);
                                //Cambiamos la saida del comando a la entrada de la tuberia anterior
                                dup2(fdpip[x][1], STDOUT_FILENO);
-                           } else { // Si el comando es el último de la secuencia, cambiamos el input del comando a la tubería anterior como output
+                           }
+                           else { // Si el comando es el último de la secuencia, cambiamos el input del comando a la tubería anterior como output
                                dup2(fdpip[x - 1][0], STDIN_FILENO);
                                if (strcmp(filev[1], "0") != 0) {// output file
                                    if ((fd2 = open(filev[1], O_WRONLY | O_CREAT | O_TRUNC, 0664)) <
@@ -372,8 +370,8 @@ int main(int argc, char* argv[])
                                    close(fd2);
                                }
                                if (strcmp(filev[2], "0") != 0) {//Fichero de errores
-                                   if ((fd3 = open(filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) <
-                                       0) {//Si no puede abrirse, error
+                                   if ((fd3 = open(filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) < 0{
+                                       //Si no puede abrirse, error
                                        perror("No se puede leer el fichero de salida");
                                    }
                                    //Cambiamos el standard error al fichero de errores
@@ -381,8 +379,8 @@ int main(int argc, char* argv[])
                                    close(fd3);
                                }
                            }
-                           for (int y = 0;
-                                y < command_counter - 1; y++) {//Cerramos todas las tuberías aunque ya lo estén
+                           for (int y = 0; y < command_counter - 1; y++) {
+                               //Cerramos todas las tuberías aunque ya lo estén
                                close(fdpip[y][0]); //Output
                                close(fdpip[y][1]); //Input
                            }
@@ -422,3 +420,4 @@ int main(int argc, char* argv[])
     }
     return 0;
 }
+
