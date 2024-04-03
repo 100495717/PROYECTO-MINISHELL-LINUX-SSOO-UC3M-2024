@@ -197,15 +197,15 @@ int main(int argc, char* argv[])
 	   if (command_counter > 0) {
            if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] == NULL){
                printf("No se ha introducido el primer operando");
-               return -1
+               return -1;
            }
            if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][2] == NULL){
                printf("No se ha introducido la operación");
-               return -1
+               return -1;
            }
            if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][3] == NULL){
                printf("No se ha introducido el segundo operando");
-               return -1
+               return -1;
            }
 			 else if (strcmp(argvv[0][0],"mycalc") == 0 && argvv[0][1] != NULL && argvv[0][2] != NULL && argvv[0][3] != NULL) {
                 //Si los argumentos son correctos, coge el comando mycalc
@@ -324,7 +324,7 @@ int main(int argc, char* argv[])
                    if(pid == -1){
                        //Si hay algun error
                        perror("Hay un error al crear al hijo");
-                       return(-1)
+                       return -1;
                    }
                    else if (pid == 0)
                    {
@@ -437,5 +437,5 @@ int main(int argc, char* argv[])
            }
 		}
     }
-    return 0
+    return 0;
 }
