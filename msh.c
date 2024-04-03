@@ -415,11 +415,11 @@ int main(int argc, char* argv[])
                        if (x == 0 && command_counter > 1)
                        {//Para el primer comando solo cerramos el input de la primera tubería, no lo vamos a usar de nuevo
                            close(fdpip[0][1]);
-                       }
+
                            if (x > 0)
                            {//cerramos todas las tuberías, no las vamos a volver a usar
-                               close(fdp[x - 1][1]);
-                               close(fdp[x - 1][0]);
+                               close(fdpip[x - 1][1]);
+                               close(fdpip[x - 1][0]);
                            }
                            if (in_background == 0)
                            {//Solo esperamos si background is False
@@ -430,12 +430,12 @@ int main(int argc, char* argv[])
                                if (x == command_counter - 1)
                                {//Imprime el pid del último comando, para mandatos simples sera también el último
                                    printf("[%d]\n", pid);
+                               }
                            }
                        }
                    }
                }
-           }
-		}
-    }
+		   }
+       }
     return 0;
 }
