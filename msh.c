@@ -184,12 +184,12 @@ int main(int argc, char* argv[])
         if( end != 0 && executed_cmd_lines < end) {
             command_counter = read_command_correction(&argvv, filev, &in_background, cmd_lines[executed_cmd_lines]);
         }
-        else if( end != 0 && executed_cmd_lines == end) {
+        else if( end != 0 && executed_cmd_lines == end)
             return 0;
-        }
-        else {
+
+        else
             command_counter = read_command(&argvv, filev, &in_background); //NORMAL MODE
-        }
+
 		//************************************************************************************************
 
 		/************************ STUDENTS CODE ********************************/
