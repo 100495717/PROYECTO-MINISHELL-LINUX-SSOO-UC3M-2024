@@ -1,7 +1,7 @@
 //P2-SSOO-23/24
 //  MSH main file
 // Write your msh source code here
-//#include "parser.h"
+//#include "parser.h
 #include <stddef.h>			/* NULL */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -13,11 +13,11 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <pthread.h>
 
 #define MAX_COMMANDS 8
 
-// files in case of redirection
+
+// ficheros por si hay redirección
 char filev[3][64];
 
 //to store the execvp second parameter
@@ -25,9 +25,9 @@ char *argv_execvp[8];
 
 void siginthandler(int param)
 {
-	printf("****  Exiting MSH **** \n");
-	//signal(SIGINT, siginthandler);
-	exit(0);
+    printf("****  Saliendo del MSH **** \n");
+    //signal(SIGINT, siginthandler);
+    exit(0);
 }
 
 /* myhistory */
@@ -36,16 +36,16 @@ void siginthandler(int param)
 
 struct command
 {
-  // Store the number of commands in argvv
-  int num_commands;
-  // Store the number of arguments of each command
-  int *args;
-  // Store the commands
-  char ***argvv;
-  // Store the I/O redirection
-  char filev[3][64];
-  // Store if the command is executed in background or foreground
-  int in_background;
+    // Store the number of commands in argvv
+    int num_commands;
+    // Store the number of arguments of each command
+    int *args;
+    // Store the commands
+    char ***argvv;
+    // Store the I/O redirection
+    char filev[3][64];
+    // Store if the command is executed in background or foreground
+    int in_background;
 };
 
 int history_size = 20;
@@ -122,20 +122,21 @@ void store_command(char ***argvv, char filev[3][64], int in_background, struct c
  * @return
  */
 void getCompleteCommand(char*** argvv, int num_command) {
-	//reset first
-	for(int j = 0; j < 8; j++)
-		argv_execvp[j] = NULL;
+    //reset first
+    for(int j = 0; j < 8; j++)
+        argv_execvp[j] = NULL;
 
-	int i;
-	for ( i = 0; argvv[num_command][i] != NULL; i++)
-		argv_execvp[i] = argvv[num_command][i];
+    int i = 0;
+    for ( i = 0; argvv[num_command][i] != NULL; i++)
+        argv_execvp[i] = argvv[num_command][i];
 }
 
 
 /**
- * Main sheell  Loop
+ * Main shell  Loop
  */
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     /**** Do not delete this code.****/
     int end = 0;
     int executed_cmd_lines = -1;
@@ -143,13 +144,13 @@ int main(int argc, char* argv[]) {
     char *cmd_lines[10];
 
     if (!isatty(STDIN_FILENO)) {
-        cmd_line = (char *) malloc(100);
-        while (scanf(" %[^\n]", cmd_line) != EOF) {
-            if (strlen(cmd_line) <= 0) return 0;
-            cmd_lines[end] = (char *) malloc(strlen(cmd_line) + 1);
+        cmd_line = (char*)malloc(100);
+        while (scanf(" %[^\n]", cmd_line) != EOF){
+            if(strlen(cmd_line) <= 0) return 0;
+            cmd_lines[end] = (char*)malloc(strlen(cmd_line)+1);
             strcpy(cmd_lines[end], cmd_line);
             end++;
-            fflush(stdin);
+            fflush (stdin);
             fflush(stdout);
         }
     }
@@ -157,243 +158,328 @@ int main(int argc, char* argv[]) {
     /*********************************/
 
     char ***argvv = NULL;
-    int num_commands;
-
-    history = (struct command *) malloc(history_size * sizeof(struct command));
+    int num_commands, status;
+    history = (struct command*) malloc(history_size *sizeof(struct command));
     int run_history = 0;
-
-    while (1) {
+    //seteamos la variable de entorno Acc
+    setenv("Acc","0",1);
+    int contador = 0;
+    while (1)
+    {
         int status = 0;
         int command_counter = 0;
         int in_background = 0;
         signal(SIGINT, siginthandler);
 
-        if (run_history) {
-            run_history = 0;
-        } else {
-            // Prompt
+        if (run_history)
+        {
+            run_history=0;
+        } else{
             write(STDERR_FILENO, "MSH>>", strlen("MSH>>"));
-
-            // Get command
-            //********** DO NOT MODIFY THIS PART. IT DISTINGUISH BETWEEN NORMAL/CORRECTION MODE***************
-            executed_cmd_lines++;
-            if (end != 0 && executed_cmd_lines < end) {
-                command_counter = read_command_correction(&argvv, filev, &in_background, cmd_lines[executed_cmd_lines]);
-            } else if (end != 0 && executed_cmd_lines == end)
-                return 0;
-
-
-            else {
-                command_counter = read_command(&argvv, filev, &in_background);
-            }//NORMAL MODE
-
-            //************************************************************************************************
-
-            /************************ STUDENTS CODE ********************************/
-            if (command_counter > 0) {
-                if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][1] == NULL) {
-                    printf("No se ha introducido el primer operando\n");
-                    return -1;
-                }
-                if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][2] == NULL) {
-                    printf("No se ha introducido la operación\n");
-                    return -1;
-                }
-                if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][3] == NULL) {
-                    printf("No se ha introducido el segundo operando\n");
-                    return -1;
-                } else if (strcmp(argvv[0][0], "mycalc") == 0 && argvv[0][1] != NULL && argvv[0][2] != NULL &&
-                           argvv[0][3] != NULL) {
-                    //Si los argumentos son correctos, coge el comando mycalc
-                    int arg1 = atoi(argvv[0][1]), arg2 = atoi(argvv[0][3]); // Convierte los argumentos en enteros
-                    char mensaje[100]; //Variable para guardar el mensaje
-                    if (strcmp(argvv[0][2], "add") == 0) {
-                        //Caso de la suma
-                        char var_entorno[128];
-                        char *p = var_entorno; //Puntero de la variable de entorno
-                        if (p == NULL) {
-                            //Inicializa el valor de Acc
-                            p = "0";
-                        }
-                        //Guardamos en var_entorno el valor de Acc como string
-                        sprintf(var_entorno, "%d", (atoi(var_entorno) + arg1 + arg2));
-                        //Creamos la variable de entorno Acc con valor p
-                        setenv("Acc", p, 1);
-                        //Guardamos en mensaje la salida
-                        snprintf(mensaje, 100, "[OK] %d + %d = %d; Acc %s\n", arg1, arg2, arg1 + arg2, getenv("Acc"));
-                    } else if (strcmp(argvv[0][2], "mul") ==
-                               0) {//Caso de que los argumentos esten multiplicados, guarda el mensaje en la variable mensaje
-                        snprintf(mensaje, 100, "[OK] %d * %d - %d\n", arg1, arg2, arg1 * arg2);
-                    } else if (strcmp(argvv[0][2], "div") == 0) {//Caso de que el argumento sea div
-                        if (arg2 == 0) {// Comprueba si se divide /0
-                            snprintf(mensaje, 100, "[ERROR] No puedes dividir por 0\n");
-                        } else {//Guarda en la variable mensaje, el mensaje
-                            snprintf(mensaje, 100, "[OK] %d / %d = %d; Resto %d\n", arg1, arg2, arg1 / arg2,
-                                     arg1 % arg2);
-                        }
-                    } else { //Hay un error con la estructura del comando, de nuevo guardamos el mensaje en nuestra variable mensaje
-                        snprintf(mensaje, 100,
-                                 "[ERROR] La estructura del comando es mycalc <operando_1> <add/mul/div> <operando_2>\n");
-                    }
-                    if (mensaje[1] == '0') {
-                        // Si mensaje[1] == 0 escribimos en el std_error
-                        write(STDERR_FILENO, mensaje, strlen(mensaje));
-                    } else {
-                        // En cualquier otro caso escribimos en el std_output
-                        write(STDOUT_FILENO, mensaje, strlen(mensaje));
-                    }
-                } else if (strcmp(argvv[0][0], "myhistory") == 0) {
-                    if (argvv[0][1] == NULL) {
-                        //Se desea ver la lista de los últimos 20 comandos
-                        int start = (head + 1) % history_size;
-                        int i = start;
-                        int count = 1;
-                        while (count < history_size) {
-                            if (history[i].num_commands == 0) {
-                                break;
-                            }
-                            //Imprimimos el número de comando actual
-                            fprintf(stderr, "%d", count);
-                            for (int j = 0; j < history[i].num_commands; j++) {
-                                for (int k = 0; k < history[i].args[j]; k++) {
-                                    fprintf(stderr, "%s ", history[i].argvv[j][k]);
-                                }
-                                fprintf(stderr, " | ");
-                            }
-                            fprintf(stderr, "\n");
-                            i = (i + 1) % history_size;
-                            count++;
-                        }
-                        run_history = 1;
-                    } else {
-                        int argumento = atoi(argvv[0][1]);
-                        if (argumento >= 0 && argumento <= 19) {
-                            int indice = (head + 1 + argumento) % history_size;
-                            if (history[indice].num_commands != 0) {
-                                fprintf(stderr, "Ejecutando el comando %d\n", argumento);
-                                //Obtenemos el comando correspondiente
-                                char *comando = history[argumento].argvv[0][0];
-                                execvp(comando, history[indice].argvv[0]);
-                                //
-                            }
-                        } else {
-                            fprintf(stderr, "ERROR: Comando no encontrado\n");
-                        }
-                    }
-                } else {
-                    pid_t pid;
-                    int fd1, fd2, fd3; // ficheros para la entrada, la salida y errores
-
-                    // Creamos un array de tuberias del tamaño de los comandos - 1
-                    int fdpip[command_counter - 1][2];
-
-                    // Creamos las tuberias
-                    for (int x = 0; x < command_counter - 1; x++) {
-                        if (pipe(fdpip[x]) == -1) {
-                            // Mostramos un mensaje de error si no se crea la tuberia
-                            perror("No se puede crear la tuberia");
-                        }
-                    }
-                    for (int x = 0; x < command_counter; x++) {
-                        //Creamos al hijo
-                        pid = fork();
-                        if (pid == -1) {
-                            //Si hay algun error
-                            perror("Hay un error al crear al hijo");
-                            return -1;
-                        } else if (pid == 0) {
-                            getCompleteCommand(argvv, x);
-                            if (x == 0) {
-                                // En el primer comando
-                                if (strcmp(filev[0], "0") != 0) {
-                                    //Comprobamos que haya un fichero de entrada
-                                    if ((fd1 = open(filev[0], O_RDONLY)) < 0) {
-                                        perror("No se puede leer el fichero de entrada");
-                                    }
-                                    //Cambiamos la entrada al fichero de entrada
-                                    dup2(fd1, STDIN_FILENO);
-                                    close(fd1);
-                                }
-                                if (command_counter == 1) {
-                                    //Si solo tenemos un comando tenemos que mirar el fichero de salida y de error)
-                                    if (strcmp(filev[1], "0") != 0) {
-                                        if ((fd2 = open(filev[1], O_WRONLY | O_CREAT | O_TRUNC, 0664)) < 0) {
-                                            perror("No se puede abrir el fichero de salida");
-                                        }
-                                        //Cambiamos la salida al fichero de salida
-                                        dup2(fd2, STDOUT_FILENO);
-                                        close(fd2);
-                                    }
-                                    if (strcmp(filev[2], "0") != 0) {
-                                        if ((fd3 = open(filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) < 0) {
-                                            perror("No se puede abrir el fichero de error");
-                                        }
-                                        //Cambiamos el error al fichero de error
-                                        dup2(fd3, STDERR_FILENO);
-                                        close(fd3);
-                                    } else {
-                                        //Cambiamos la salida a la primera tubería
-                                        dup2(fdpip[0][1], STDOUT_FILENO);
-                                    }
-                                } else if (x < command_counter - 1) {
-                                    // Si el comando está entre el primero y el último
-                                    //Cambiamos la entrada del comando a la salida de la tuberia anterior
-                                    dup2(fdpip[x - 1][0], STDIN_FILENO);
-                                    //Cambiamos la saida del comando a la entrada de la tuberia anterior
-                                    dup2(fdpip[x][1], STDOUT_FILENO);
-                                } else { // Si el comando es el último de la secuencia, cambiamos el input del comando a la tubería anterior como output
-                                    dup2(fdpip[x - 1][0], STDIN_FILENO);
-                                    if (strcmp(filev[1], "0") != 0) {// output file
-                                        if ((fd2 = open(filev[1], O_WRONLY | O_CREAT | O_TRUNC, 0664)) <
-                                            0) {//Si no puede abrirse, error
-                                            perror("No se puede leer el fichero de salida");
-                                        }
-                                        dup2(fd2, STDOUT_FILENO);
-                                        close(fd2);
-                                    }
-                                    if (strcmp(filev[2], "0") != 0) {//Fichero de errores
-                                        if ((fd3 = open(filev[2], O_WRONLY | O_CREAT | O_APPEND, 0664)) < 0) {
-                                            //Si no puede abrirse, error
-                                            perror("No se puede leer el fichero de salida");
-                                        }
-                                        //Cambiamos el standard error al fichero de errores
-                                        dup2(fd3, STDERR_FILENO);
-                                        close(fd3);
-                                    }
-                                }
-                                for (int y = 0; y < command_counter - 1; y++) {
-                                    //Cerramos todas las tuberías aunque ya lo estén
-                                    close(fdpip[y][0]); //Output
-                                    close(fdpip[y][1]); //Input
-                                }
-                                //Hacemos el execvp
-                                execvp(argv_execvp[0], argv_execvp);
-                            }
-                        } else {
-                            //PADRE
-                            if (x == 0 && command_counter > 1) {
-                                close(fdpip[0][1]);
-                            }
-
-                            if (x > 0) {//cerramos todas las tuberías, no las vamos a volver a usar
-                                close(fdpip[x - 1][1]);
-                                close(fdpip[x - 1][0]);
-                            }
-                            if (in_background == 0) {//Solo esperamos si background is False
-                                wait(NULL);
-                            } else {//No esperamos
-                                if (x == command_counter -
-                                         1) {//Imprime el pid del último comando, para mandatos simples sera también el último
-                                    printf("[%d]\n", pid);
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
+        // Get command
+        //********** DO NOT MODIFY THIS PART. IT DISTINGUISH BETWEEN NORMAL/CORRECTION MODE***************
+        executed_cmd_lines++;
+        if( end != 0 && executed_cmd_lines < end) {
+            command_counter = read_command_correction(&argvv, filev, &in_background, cmd_lines[executed_cmd_lines]);
+        }else if( end != 0 && executed_cmd_lines == end)
+            return 0;
+        else
+            command_counter = read_command(&argvv, filev, &in_background); //NORMAL MODE
+        //************************************************************************************************
+
+
+        /************************ STUDENTS CODE ********************************/
+        if (command_counter > 0) {
+            if (command_counter > MAX_COMMANDS)
+                printf("Error: Numero máximo de comandos es %d \n", MAX_COMMANDS);
+            else
+            {	//guardamos los descriptores 
+                int desc_in = dup(0);
+                int desc_out = dup(1);
+                int desc_error = dup(2);
+
+                if(strcmp(argvv[0][0],"mycalc")==0)
+                    {
+                    //variables que vamos a utilizar
+                    char mensaje[100], mensajito[100];
+                    int bien = 0;
+                    int suma;
+                    int operando_1 = atoi(argvv[0][1]);
+                    int operando_2 = atoi(argvv[0][3]);
+                    if(strcmp(argvv[0][2],"add")==0)
+                    {
+                        suma = operando_1 + operando_2;
+
+                   
+                        snprintf(mensajito,"%i",suma + atoi(getenv("Acc")));
+
+                        //establecemos el nuevo Acc en mensajito
+                        if (setenv("Acc",mensajito,1) < 0){
+
+                            snprintf(mensaje, "Error al dar valor a la variable de entorno\n");
+                            
+                        }
+                        snprintf(mensaje,"[OK] %i + %i = %i; Acc %s\n",operando_1,operando_2,suma,getenv("Acc"));
+			bien = 1
+                        
+                        if(bien == 1){
+
+                            write(STDERR_FILENO, mensaje, strlen(mensaje));
+                            continue;
+                        }
+                        else {
+                            write(STDOUT_FILENO, mensaje, strlen(mensaje));
+                            continue;
+                        }    
+
+                    }
+                    else if(strcmp(argvv[0][2], "mul")==0){
+                        fprintf(stderr, "[OK] %d * %d = %d\n", operando_1, operando_2, operando_1 * operando_2);
+
+                        
+                            continue;
+                        }
+                    }
+
+                    else if(strcmp(argvv[0][2],"div")==0)
+                    {//comprobamos que no se divide entre cero
+                        if (operando_2 != 0)
+                        {
+                            fprintf(stderr, "[OK] %d / %d = %d; Resto %d \n", operando_1, operando_2,  (operando_1 / operando_2), (operando_1 % operando_2));
+
+                           
+                                continue;
+                            }
+
+                        }
+                        else
+                        {
+                            fprintf(stdout, "[ERROR] No se puede dividir entre cero\n")
+                                continue;
+                            
+                        }
+                    }
+               	    else {
+               	    	fprintf(stdout, "[ERROR] La estructura del comando es mycalc <operando_1> <add/mul/div> <operando_2>\n");
+               	    	continue;
+                }
+                else if(strcmp(argvv[0][0],"myhistory")==0)
+                {
+                    int i;
+
+                    if (argvv[0][1] != NULL) {
+                        // Mostrar un comando específico del historial
+                        int index = atoi(argvv[0][1]) - 1;
+                        int history_size = 20;
+                        if (index + 1 < 0 ||  index  >= history_size){
+                            printf("ERROR: Comando no encontrado\n");
+                            continue;
+                        }
+                        else{
+                            fprintf(stderr,"Ejecutando el comando %d\n", index + 1);
+                            struct command *cmd = &history[index];
+        for (int i = 0; i < cmd->num_commands; i++) {
+            getCompleteCommand(cmd->argvv, i);
+            execvp(argv_execvp[0], argv_execvp);
+
+
+                        }
+                        }
+
+                    } else {
+                        // Mostrar el historial completo
+
+                        for (int i = 0; i < contador; i++) {
+
+                            fprintf(stderr, "%d ", i );
+                            struct command *cmd = &history[i];
+                            for (int j= 0; j < cmd->num_commands; j++){
+                                for (int k = 0; k<cmd->args[j];k++){
+                                    fprintf(stderr, "%s ", cmd->argvv[j][k]);
+                                }
+                                fprintf(stderr,"| ");
+                            }
+                            fprintf(stderr, "\n");
+
+
+                        }
+                        continue;
+
+                    }
+                }
+
+                else
+                {//procesos multiples con redirecciones y pipes
+                    int p_desc[2];
+                    int pipe_ok, p10, desc;
+                    pid_t pid;
+                    //vamos a hacer las redirecciones en el padre ya que luego las van a heredar los hijos directamente
+                    //para asegurar que cada hijo reciba la que le corresponda crearemos redirecciones condicionales mas adelante
+                    if(strcmp(filev[0],"0")!=0)
+                    {
+                        if ((desc = open(filev[0],O_RDONLY))<0){
+                            fprintf(stdout, "[ERROR] Error al abrir desc_in\n");
+                            continue;
+                        }
+                        if (dup2(desc,0)<0){
+                            fprintf(stdout, "[ERROR] Error dup2 desc_in\n");
+                            if (close(desc)<0){
+                                fprintf("[ERROR] Error al cerrar desc_out\n");
+                            }
+                            continue;
+                        }
+                        if (close(desc)<0){
+                            fprintf("[ERROR] Error cerrando desc_in\n");
+                            continue;
+                        }
+                    }
+                    if(strcmp(filev[1],"0")!=0)
+                    {
+                        if ((desc = open(filev[1],O_TRUNC | O_CREAT| O_WRONLY, 0644))<0){
+                            fprintf(stdout, "[ERROR] Error al abrir desc_out\n");
+                            continue;
+                        }
+                        if (dup2(desc,1)<0){
+                            fprintf(stdout, "[ERROR] Error dup2 desc_out\n");
+                            if (close(desc)<0){
+                                fprintf(stdout, "[ERROR] Error cerrando desc_out\n");
+                            }
+                            continue;
+                        }
+                        if (close(desc)<0){
+                            fprintf(stdout, "[ERROR] Error cerrando desc_out\n");
+                            continue;
+                        }
+                    }
+                    if(strcmp(filev[2],"0")!=0)
+                    {
+                        if ((desc = open(filev[2],O_TRUNC | O_CREAT| O_WRONLY, 0644))<0){
+                            fprintf(stdout, "[ERROR] Error al abrir desc_error\n");
+                            continue;
+                        }
+                        if (dup2(desc,2)<0){
+                            fprintf(stdout, "[ERROR] Error dup2 desc_error\n");
+                            if (close(desc)<0){
+                                fprintf(stdout, "[ERROR] Error al cerrar desc_out\n");
+                            }
+                            continue;
+                        }
+                        if (close(desc)<0){
+                            fprintf(stdout, "[ERROR] Error cerrando desc_error\n");
+                            continue;
+                        }
+                    }
+
+                    for (int i=0; i<command_counter; i++)
+                    {
+                        //mientras que no estemos en el ultimo proceso, crearemos una pipe nueva por iteración
+                        if (i != (command_counter-1)){
+                            if ((pipe_ok = pipe(p_desc))<0){
+                                fprintf(stdout, "[ERROR] Error creando pipe");
+                                continue;
+                            }
+                        }
+                        //2. Creamos el fork
+                        pid = fork();
+                        if (pid<0)
+                        {
+                            fprintf(stderr, "fork: ");
+                            if((close(p_desc[0])) < 0 && command_counter>1){
+                                fprintf(stdout, "[ERROR] Error al cerrar descriptor");
+                                continue;
+                            }
+                            if((close(p_desc[1])) <0 && command_counter>1){
+                                fprintf(stdout, "[ERROR] Error al cerrar descriptor");
+                                continue;
+                            }
+                            return (-1); //################################################################
+                            //cerramos el proceso entero, padre e hijo
+                        }
+
+                        //3. redirecciones y 4. limpieza
+                        if (0 == pid){
+                            if (i!=0){
+                                //redireccion de entrada
+                                if (dup2(p10,0)<0){
+                                    fprintf(stdout, "[ERROR] Error dup2 en redireccion de entrada\n");
+                                    exit(-1);//#################################################
+                                }
+                                if (close(p10)<0){
+                                    fprintf(stdout, "[ERROR] Error al cerrar pipe\n");
+                                    exit(-1);//#################################################
+                                }
+
+                            }
+                            if (i!=command_counter-1){
+                                //redireccion de salida
+                                if (dup2(p_desc[1],1)<0){
+                                    fprintf(stdout, "[ERROR] Error dup2 en redireccion de salida\n");
+                                    exit(-1);//#################################################
+                                }
+                                //limpieza en todas las pipes menos para el ultimo proceso
+                                if (close(p_desc[0])<0){
+                                    fprintf(stdout, "[ERROR] Error al cerrar pipe\n");
+                                    exit(-1);//#################################################
+                                }
+                                if (close(p_desc[1])<0){
+                                    fprintf(stdout, "[ERROR] Error al cerrar pipe\n");
+                                    exit(-1);//#################################################
+                                }
+                            }
+
+                            //ejecutamos proceso en hijo
+                            execvp(argvv[i][0], argvv[i]);
+
+                            //si pasamos de esta linea es xq algo ha ido mal como vimos en clase
+                            fprintf(stdout, "[ERROR] Error al ejecutar\n");
+                            exit(-1);
+
+
+                            //final proceso hijo
+                        }
+                        else{
+                            if (i!=command_counter-1){
+                                if (close(p_desc[1])<0){
+                                    fprintf(stdout, "[ERROR] Error al cerrar pipe\n");
+                                    exit(-1);//#################################################
+                                }
+                                p10 = p_desc[0];
+                            }
+                            else if(command_counter>1){
+                                //solo se ejecuta si se han creado pipes
+                                if (close(p_desc[0])<0){
+                                    fprintf(stdout, "[ERROR] Error al cerrar el pipe\n");
+                                    exit(-1);//#################################################
+                                }
+                            }
+                            if(in_background == 0){
+                                while (pid != wait(&status));
+                                if (status <0){
+                                    fprintf(stdout, "[ERROR] Error en proceso hijo");
+                                }
+                            }
+                            else{
+                                printf("[%d]\n",pid);
+                            }
+                            //final proceso padre
+                        }
+
+                        //final del bucle for
+                    }
+                    dup2(desc_in,0);
+                    dup2(desc_out,1);
+                    dup2(desc_error,2);
+                    close(desc_in);
+                    close(desc_out);
+                    close(desc_error);
+                    //final del else
+                }
+            }
+
+        }
+        contador++;
     }
     return 0;
 }
