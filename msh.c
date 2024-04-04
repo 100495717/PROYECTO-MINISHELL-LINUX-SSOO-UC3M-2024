@@ -135,35 +135,34 @@ void getCompleteCommand(char*** argvv, int num_command) {
 /**
  * Main sheell  Loop
  */
-int main(int argc, char* argv[])
-{
-	/**** Do not delete this code.****/
-	int end = 0;
-	int executed_cmd_lines = -1;
-	char *cmd_line = NULL;
-	char *cmd_lines[10];
+int main(int argc, char* argv[]) {
+    /**** Do not delete this code.****/
+    int end = 0;
+    int executed_cmd_lines = -1;
+    char *cmd_line = NULL;
+    char *cmd_lines[10];
 
-	if (!isatty(STDIN_FILENO)) {
-		cmd_line = (char*)malloc(100);
-		while (scanf(" %[^\n]", cmd_line) != EOF){
-			if(strlen(cmd_line) <= 0) return 0;
-			cmd_lines[end] = (char*)malloc(strlen(cmd_line)+1);
-			strcpy(cmd_lines[end], cmd_line);
-			end++;
-			fflush (stdin);
-			fflush(stdout);
-		}
-	}
+    if (!isatty(STDIN_FILENO)) {
+        cmd_line = (char *) malloc(100);
+        while (scanf(" %[^\n]", cmd_line) != EOF) {
+            if (strlen(cmd_line) <= 0) return 0;
+            cmd_lines[end] = (char *) malloc(strlen(cmd_line) + 1);
+            strcpy(cmd_lines[end], cmd_line);
+            end++;
+            fflush(stdin);
+            fflush(stdout);
+        }
+    }
 
-	/*********************************/
+    /*********************************/
 
-	char ***argvv = NULL;
-	int num_commands;
+    char ***argvv = NULL;
+    int num_commands;
 
-	history = (struct command*) malloc(history_size *sizeof(struct command));
-	int run_history = 0;
+    history = (struct command *) malloc(history_size * sizeof(struct command));
+    int run_history = 0;
 
-	while (1) {
+    while (1) {
         int status = 0;
         int command_counter = 0;
         int in_background = 0;
@@ -243,7 +242,6 @@ int main(int argc, char* argv[])
                         // En cualquier otro caso escribimos en el std_output
                         write(STDOUT_FILENO, mensaje, strlen(mensaje));
                     }
-                    break;
                 } else if (strcmp(argvv[0][0], "myhistory") == 0) {
                     if (argvv[0][1] == NULL) {
                         //Se desea ver la lista de los últimos 20 comandos
@@ -395,5 +393,7 @@ int main(int argc, char* argv[])
                 }
             }
         }
-        return 0;
+
     }
+    return 0;
+}
