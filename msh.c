@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
 
                     } else {
                         // Mostrar el historial completo
-
+                        //No sabemos cómo acceder a los comandos
                         for (int i = 0; i < contador; i++) {
 
                             fprintf(stderr, "%d ", i );
